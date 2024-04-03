@@ -1,0 +1,72 @@
+---
+title: "Final Project"
+author: "Eric Folsom, Amrit Singh"
+date: "12/5/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+|      For our project, we chose to forecast the future average earnings of drift gillnet vessels in Bristol Bay, Alaska. The data that we obtained was from the Commercial Fishing Entries Commission (CFEC) of Alaska. The dataset is a collection of data from each year of fishing in Bristol Bay Alaska from 1975-2020. The time period in which this data is collected is in a two month span from June through July each year. This forecasting is significant to our group because Eric commercial fishes in Bristol Bay. This data is also significant because we can use it to forecast the future health of the fishing industry.
+
+|      The dataset that we used is a collection of all the commercial fishing data from the state of Alaska. Because of this, we had to filter our dataset to only include data from the drift gillnet fishery in Bristol Bay. To begin forecasting, we had to use the astsa and the forecasting package in R.
+We began our forecasting by taking a look at the original dataset.
+```{r, results='hide'}
+library(forecast)
+```
+```{r}
+setwd("C:/Users/Eric Folsom/Desktop/School work/Stats 456")
+data=read.csv("fishdat.csv")
+earnings=rev(data$Average.Earnings)
+salmonts=ts(earnings, start=1975)
+plot(salmonts, xlab="Year", ylab="Average Earnings", main="Average Earnings per Permit
+    Bristol Bay, AK 1975-2020")
+```
+  We will also inspect the ACF and PACF plots of this series.
+```{r}
+par(mfrow=c(1,2))
+acf(salmonts, main="")
+pacf(salmonts, main="")
+```
+  From the initial plot, can see that there is a trend in this time series. Additionally, the ACF shows a slow decay to zero which indicates that a possible remedy will be to difference the time series at lag 1.
+```{r}
+d1=diff(salmonts)
+plot(d1)
+```
+  After differencing we can see that the series is now stationary. We then inspected the ACF and PACF to determine which model we will use for forecasting.
+```{r}
+par(mfrow=c(1,2))
+acf(d1, main="")
+pacf(d1, main="")
+```
+  From the ACF and PACF plots we can see that this series could be modeled by either an ARIMA(3,1,0), or an ARIMA(3,1,3). We will test both to see which model will be a better forecasting tool. 
+```{r}
+fit1=arima(salmonts,order=c(3,1,0))
+fit2=arima(salmonts,order=c(3,1,3))
+fit1
+fit2
+```
+  After looking at the AIC's of our model, we can see that the ARIMA(3,1,0) model fits our data the best. This is because the AIC is lower than the ARIMA(3,1,3) and it also includes less parameters than the ARIMA(3,1,3). Because of this we will choose an ARIMA(3,1,0) model for forecasting.
+```{r}
+fit1_fore=forecast(fit1)
+autoplot(fit1_fore, ylab="Average Earnings")
+fit1_fore
+```
+  After forecasting we then checked the residuals of the data to make sure that the residuals were IID and from a normal distribution.
+```{r}
+checkresiduals(fit1)
+```
+  After checking the residuals we can see that the residuals are IID and come from a normal distribution.
+
+|      This data comes from an aggregrate of data from the end of each commercial fishing season. The data, however, is limited by being broken down by region. Unfortunately, there is no data for the specific districts within each region. This causes issues because there are certain districts that perform better than others because the amount of fish that returns to each district varies based on the size and location of each district's river system. This flaw in the data is somewhat alleviated by the ability of drift gillnet vessels to fish in whichever district is performing the best. The data would also be improved if it included data from the 2021 fishing season. Unfortunately, the dataset ends after the 2020 season; this is an issue because the prices for the fish market were suppressed in 2020 due to COVID-19 effects on the global agriculture market. From personal experience, the prices rebounded in 2021 in a way that the model most likely cannot account for due to externalities. Because the data is collected at the end of the year, we are unable to forecast how much fishermen are able to earn during different parts of the fishing season. This would be useful for people who only fish for a portion of the season. 
+  
+References:
+
+
+https://www.cfec.state.ak.us/bit/X_S03T.htm
+
+https://www.cfec.state.ak.us/PUBLIC/BIT.csv
+
+Personal experience
