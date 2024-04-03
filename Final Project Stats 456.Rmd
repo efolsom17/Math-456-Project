@@ -1,0 +1,67 @@
+---
+title: "Final Project 456"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+ 
+
+```{r}
+library(astsa)
+library(forecast)
+setwd("C:/Users/Eric Folsom/Desktop/School work/Stats 456")
+data=read.csv("fishdat.csv")
+year=rev(data$Year)
+earnings=rev(data$Average.Earnings)
+salmonts=ts(earnings, start=1975)
+plot(salmonts)
+par(mfrow=c(1,2))
+acf(salmonts)
+pacf(salmonts)
+```
+```{r}
+d1=diff(salmonts)
+plot(d1)
+par(mfrow=c(1,2))
+acf(d1)
+pacf(d1)
+```
+Trying to forecast this with an ARMA(2,0,0) or an ARMA(3,0,0)
+```{r}
+fit1=arima(salmonts, order=c(2,0,0))
+fit2=arima(salmonts, order=c(3,0,0))
+fit3=arima(salmonts, order=c(0,1,0))
+fit1
+fit2
+fit3
+```
+
+Because the AIC on the ARMA(2,0,0) process is lower than the AR(3) process, we will choose the AR(2) process for forecasting.
+
+```{r}
+fit1_fore=forecast(fit1,10)
+autoplot(fit1_fore)
+fit1_fore
+checkresiduals(fit1)
+```
+
+```{r}
+fit3_fore=forecast(fit3,10)
+autoplot(fit3_fore)
+fit3_fore
+checkresiduals(fit3)
+```
+
+```{r}
+fit4=arima(salmonts, order=c(0,1,1))
+fit4
+fit4_fore=forecast(fit4, 10)
+fit4_fore
+autoplot(fit4_fore)
+checkresiduals(fit4)
+```
+
+Random thoughts on this whole thing:
+
+Looking at the original plot of the data, it looks like there is some sort of trend present. I would suggest that we remove the trend by differencing it once. When I did this it looked as though we could model it as an ARIMA(0,1,1) or an ARIMA(0,1,0). 010 had a lower aic than 011, but the difference between the two was quit small. For all the models that I have tried to fit, the residuals are IID and come froma normal disribution, so that is not a problem. I think that a lot of the difficulty with this dataset is how short it is. I think that this is a challenge for a lot of the data from fisheries which have seasonal periods of fishing. Since data can only be collected once per year, it limits itself on the amount of information that it can give us in terms of data. I think that we should use one of the differenced models for prediction. When I was using the AR models the predictions were predicting the earnings wuold fall down to not very much. I know this is not accurate as someone who works in the industry. Also the AIC from the differenced models was much lower than the AR models. I think we should use one of the differenced models. This data would be a lot more useful if there was data from 2021.
