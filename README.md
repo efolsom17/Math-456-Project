@@ -1,1 +1,2 @@
 # Math-456-Project
+Forecasting the future average earnings of drift gillnet vessels in Bristol Bay, Alaska. The data was obtained from the Commercial Fishing Entries Commission (CFEC) of Alaska. The dataset is a collection of earnings data from each year of fishing in Bristol Bay Alaska from 1975-2020. The time period in which this data is collected is in a two month span from June through July each year.
